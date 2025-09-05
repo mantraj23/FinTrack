@@ -3,6 +3,10 @@ import FinancialRecordModel from "../schema/financial-record";
 
 const router = express.Router();
 
+
+router.get('/', async( req: Request, res: Response) => {
+  return res.status(200).send("Servering Running.....");
+}) 
 router.get("/getAllByUserID/:userId", async (req: Request, res: Response) => {
   try {
     const userId = req.params.userId;
