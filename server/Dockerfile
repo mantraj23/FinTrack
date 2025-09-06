@@ -11,7 +11,7 @@ RUN npm install
 COPY . .
 
 # Compile TS -> build/
-RUN npx tsc -p .
+RUN ./node_modules/.bin/tsc -p .
 
 # Stage 2: Run compiled JS
 FROM node:18
