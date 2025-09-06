@@ -3,26 +3,27 @@ FROM node:18 AS builder
 
 WORKDIR /app
 
-# Install all dependencies (including devDependencies)
+# Copy package.json and install dependencies (including devDependencies for tsc)
 COPY package*.json ./
 RUN npm install
 
-# Copy source code
+# Copy all source files
 COPY . .
 
 # Compile TS -> build/
-RUN npm run build
+RUN npx tsc -p .
 
 # Stage 2: Run compiled JS
 FROM node:18
 
 WORKDIR /app
 
-# Copy only necessary files
+# Copy package.json & node_modules
 COPY --from=builder /app/package*.json ./
-RUN npm install --only=production
+COPY --from=builder /app/node_modules ./node_modules
 
+# Copy compiled build
 COPY --from=builder /app/build ./build
 
 EXPOSE 3001
-CMD ["node", "build/index.js"]
+CMD ["npm", "start"]
