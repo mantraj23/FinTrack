@@ -61,6 +61,7 @@ jobs:
           echo "Starting new containers..."
           docker run -d --name fintrack-server \
             --network fintrack-net \
+            --network-alias server \  # 👈 alias so nginx.conf works
             --env-file /home/ubuntu/fintrack-server/.env \
             -p 3001:3001 \
             ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-server:latest
