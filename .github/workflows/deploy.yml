@@ -51,17 +51,22 @@ jobs:
           docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-server:latest || true
           docker system prune -af || true
 
+          echo "Ensuring Docker network exists..."
+          docker network create fintrack-net || true
+
           echo "Pulling new images..."
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-client:latest
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-server:latest
 
           echo "Starting new containers..."
           docker run -d --name fintrack-server \
+            --network fintrack-net \
             --env-file /home/ubuntu/fintrack-server/.env \
             -p 3001:3001 \
             ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-server:latest
 
           docker run -d --name fintrack-client \
+            --network fintrack-net \
             -p 80:80 \
             ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-client:latest
 
