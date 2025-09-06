@@ -33,35 +33,36 @@ jobs:
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-server:latest
 
   # -------------------------------
-  # 2. Deploy on EC2
+  # 2. Deploy on EC2 (self-hosted)
   # -------------------------------
   deploy:
     needs: build   # runs only if build succeeds
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]   # 👈 uses EC2 runner
 
     steps:
-      - name: Deploy on EC2 via SSH
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
-          script: |
-            echo "Stopping old containers..."
-            docker stop fintrack-client fintrack-server || true
-            docker rm fintrack-client fintrack-server || true
+      - name: Deploy on EC2
+        run: |
+          echo "Stopping old containers..."
+          docker stop fintrack-client fintrack-server || true
+          docker rm fintrack-client fintrack-server || true
 
-            echo "Removing old images to free space..."
-            docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-client:latest || true
-            docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-server:latest || true
-            docker system prune -af || true
+          echo "Removing old images to free space..."
+          docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-client:latest || true
+          docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-server:latest || true
+          docker system prune -af || true
 
-            echo "Pulling new images..."
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-client:latest
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-server:latest
+          echo "Pulling new images..."
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-client:latest
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-server:latest
 
-            echo "Starting new containers..."
-            docker run -d --name fintrack-server --env-file /home/ubuntu/fintrack-server/.env -p 3001:3001 ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-server:latest
-            docker run -d --name fintrack-client -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-client:latest
+          echo "Starting new containers..."
+          docker run -d --name fintrack-server \
+            --env-file /home/ubuntu/fintrack-server/.env \
+            -p 3001:3001 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-server:latest
 
-            echo "✅ Deployment finished!"
+          docker run -d --name fintrack-client \
+            -p 80:80 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/fintrack-client:latest
+
+          echo "✅ Deployment finished!"
