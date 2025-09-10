@@ -1,5 +1,5 @@
 # Stage 1: Build TypeScript
-FROM node:18 AS builder
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ COPY . .
 RUN npx tsc -p .
 
 # Stage 2: Run compiled JS
-FROM node:18
+FROM node:18-alpine
 
 WORKDIR /app
 
