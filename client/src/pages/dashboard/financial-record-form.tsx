@@ -44,7 +44,7 @@ export const FinancialRecordForm = () => {
           />
         </div>
         <div className="form-field">
-          <label>Amount:</label>
+          <label>Amount in $:</label>
           <input
             type="number"
             required
