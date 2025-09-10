@@ -2,9 +2,16 @@
 FROM node:18-alpine as builder
 
 WORKDIR /app
+
+# Pass build-time env
+ARG VITE_CLERK_PUBLISHABLE_KEY
+ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
+
 COPY package*.json ./
 RUN npm install
 COPY . .
+
+# Vite replaces import.meta.env.* during build
 RUN npm run build   # output goes to /app/dist
 
 # Nginx stage
